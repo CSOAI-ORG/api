@@ -1,0 +1,367 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MEOK AI Labs API",
+    "description": "Constitutional AI Governance Platform - Build safe, ethical AI applications",
+    "version": "2.0.0",
+    "contact": {
+      "name": "MEOK AI Labs",
+      "email": "api@meok.ai",
+      "url": "https://meok.ai"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.meok.ai/v2",
+      "description": "Production"
+    },
+    {
+      "url": "https://staging-api.meok.ai/v2",
+      "description": "Staging"
+    },
+    {
+      "url": "http://localhost:8000",
+      "description": "Local Development"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health check",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/governance/analyze": {
+      "post": {
+        "tags": ["Governance"],
+        "summary": "Analyze content against Constitutional AI",
+        "operationId": "analyzeContent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis complete",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyzeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Content blocked due to policy violation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViolationResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "security": [{"ApiKeyAuth": []}]
+      }
+    },
+    "/memory": {
+      "post": {
+        "tags": ["Memory"],
+        "summary": "Store a memory",
+        "operationId": "storeMemory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Memory stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [{"ApiKeyAuth": []}]
+      },
+      "get": {
+        "tags": ["Memory"],
+        "summary": "Query memories",
+        "operationId": "queryMemories",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {"type": "integer", "default": 10, "maximum": 100}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryQueryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [{"ApiKeyAuth": []}]
+      }
+    },
+    "/agents/{agent_id}/tasks": {
+      "post": {
+        "tags": ["Agents"],
+        "summary": "Create agent task",
+        "operationId": "createTask",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [{"ApiKeyAuth": []}]
+      }
+    },
+    "/consciousness/state": {
+      "get": {
+        "tags": ["Consciousness"],
+        "summary": "Get consciousness state",
+        "operationId": "getConsciousnessState",
+        "responses": {
+          "200": {
+            "description": "Current consciousness state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsciousnessState"
+                }
+              }
+            }
+          }
+        },
+        "security": [{"ApiKeyAuth": []}]
+      }
+    },
+    "/consciousness/dream": {
+      "post": {
+        "tags": ["Consciousness"],
+        "summary": "Enter dream mode",
+        "operationId": "enterDreamMode",
+        "responses": {
+          "200": {
+            "description": "Dream mode activated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DreamResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [{"ApiKeyAuth": []}]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key authentication"
+      }
+    },
+    "schemas": {
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string", "example": "healthy"},
+          "version": {"type": "string", "example": "2.0.0"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      },
+      "AnalyzeRequest": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": {"type": "string", "description": "Content to analyze"},
+          "framework": {"type": "string", "default": "constitutional"},
+          "type": {"type": "string", "default": "text"}
+        }
+      },
+      "AnalyzeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "score": {"type": "number", "minimum": 0, "maximum": 1},
+          "passed": {"type": "boolean"},
+          "violations": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/Violation"}
+          },
+          "recommendations": {"type": "array", "items": {"type": "string"}},
+          "framework": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      },
+      "Violation": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string"},
+          "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+          "description": {"type": "string"}
+        }
+      },
+      "MemoryRequest": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": {"type": "string"},
+          "type": {"type": "string", "default": "episodic"},
+          "tags": {"type": "array", "items": {"type": "string"}},
+          "importance": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.5}
+        }
+      },
+      "MemoryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "type": {"type": "string"},
+          "tags": {"type": "array", "items": {"type": "string"}},
+          "importance": {"type": "number"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "MemoryQueryResponse": {
+        "type": "object",
+        "properties": {
+          "query": {"type": "string"},
+          "count": {"type": "integer"},
+          "memories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "content": {"type": "string"},
+                "similarity": {"type": "number"}
+              }
+            }
+          }
+        }
+      },
+      "TaskRequest": {
+        "type": "object",
+        "required": ["instruction"],
+        "properties": {
+          "instruction": {"type": "string"},
+          "priority": {"type": "string", "enum": ["low", "normal", "high"], "default": "normal"}
+        }
+      },
+      "TaskResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "agent_id": {"type": "string"},
+          "status": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "ConsciousnessState": {
+        "type": "object",
+        "properties": {
+          "level": {"type": "number", "minimum": 0, "maximum": 1},
+          "coherence": {"type": "number", "minimum": 0, "maximum": 1},
+          "awareness": {"type": "number", "minimum": 0, "maximum": 1},
+          "active_processes": {"type": "array", "items": {"type": "string"}},
+          "metrics": {"type": "object"}
+        }
+      },
+      "DreamResponse": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "mode": {"type": "string"},
+          "duration_seconds": {"type": "integer"}
+        }
+      },
+      "ViolationResponse": {
+        "type": "object",
+        "properties": {
+          "error": {"type": "string"},
+          "violations": {"type": "array", "items": {"$ref": "#/components/schemas/Violation"}},
+          "score": {"type": "number"}
+        }
+      }
+    }
+  }
+}
